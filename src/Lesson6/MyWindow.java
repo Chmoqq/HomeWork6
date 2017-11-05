@@ -62,7 +62,7 @@ public class MyWindow extends JFrame {
                             if (in.hasNext()) {
                                 String w = in.nextLine();
                                 if (w.equalsIgnoreCase("end session")) break;
-                                jta.append(w);
+                                jta.append(w + "\n");
                             }
                         }
                     } catch (Exception e) {

@@ -14,6 +14,8 @@ public class ClientHandler implements Runnable {
     private String name;
 
     public ClientHandler(Socket s) {
+        // MyServer.clients.add(this);
+
         try {
             this.s = s;
             out = new PrintWriter(s.getOutputStream());
@@ -37,10 +39,16 @@ public class ClientHandler implements Runnable {
         }
         try {
             System.out.println("Client disconnected");
+            // MyServer.clients.remove(this);
             s.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public void sendMessage(String msg) {
+        out.println(msg);
+        out.flush();
     }
 }
 
