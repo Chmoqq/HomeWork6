@@ -12,7 +12,7 @@ public class MyServer {
     private Scanner in;
     private PrintWriter out;
 
-    public ClientHandler client;
+    private ClientHandler client;
 
     public MyServer() {
         Thread t1 = new Thread(() -> {
@@ -27,12 +27,7 @@ public class MyServer {
                 System.out.println("Client connected");
                 client = new ClientHandler(s);
 
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        sendMsg();
-                    }
-                }).start();
+                new Thread(() -> sendMsg()).start();
                 client.run();
             } catch (IOException e) {
                 e.printStackTrace();
@@ -49,7 +44,7 @@ public class MyServer {
         t1.start();
     }
 
-    void sendMsg() {
+    private void sendMsg() {
         Scanner s = new Scanner( System.in);
 
         while (true) {
