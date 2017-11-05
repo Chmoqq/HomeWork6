@@ -9,9 +9,6 @@ import java.util.Scanner;
 
 public class MyServer {
 
-    private Scanner in;
-    private PrintWriter out;
-
     private ClientHandler client;
 
     public MyServer() {
