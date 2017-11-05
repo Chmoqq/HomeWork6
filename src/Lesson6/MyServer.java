@@ -53,7 +53,9 @@ public class MyServer {
         Scanner s = new Scanner( System.in);
 
         while (true) {
-            client.sendMessage("Console: " + s.nextLine());
+            if (s.hasNext()) {
+                client.sendMessage("Console: " + s.nextLine());
+            }
         }
     }
 }
