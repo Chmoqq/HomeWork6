@@ -96,7 +96,7 @@ public class MyWindow extends JFrame {
             out.println(a);
             out.flush();
             jtf.setText("");
-            jtf.grabFocus();
+            jtf.grabFocus(); //Focusing on jTextField
         }
     }
 }
