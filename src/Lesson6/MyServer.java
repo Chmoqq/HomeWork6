@@ -42,7 +42,7 @@ public class MyServer {
     }
 
     private void sendMsg() {
-        Scanner s = new Scanner( System.in);
+        Scanner s = new Scanner(System.in);
 
         while (true) {
             if (s.hasNext()) {
