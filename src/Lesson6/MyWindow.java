@@ -21,69 +21,73 @@ public class MyWindow extends JFrame {
     private PrintWriter out;
 
     public static void main(String[] args) {
+        MyServer myServer = new MyServer();
         MyWindow myWindow = new MyWindow();
     }
 
     public MyWindow() {
-        try {
-            sock = new Socket(SERVER_ADDR, SERVER_PORT);
-            in = new Scanner(sock.getInputStream());
-            out = new PrintWriter(sock.getOutputStream());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        Thread t1 = new Thread(() -> {
+            try {
+                sock = new Socket(SERVER_ADDR, SERVER_PORT);
+                in = new Scanner(sock.getInputStream());
+                out = new PrintWriter(sock.getOutputStream());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
 
-        setBounds(600, 300, 500, 500);
-        setTitle("Client");
-        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        jta = new JTextArea();
-        jta.setEditable(false);
-        jta.setLineWrap(true);
-        JScrollPane jsp = new JScrollPane(jta);
-        add(jsp, BorderLayout.CENTER);
+            setBounds(600, 300, 500, 500);
+            setTitle("Client");
+            setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+            jta = new JTextArea();
+            jta.setEditable(false);
+            jta.setLineWrap(true);
+            JScrollPane jsp = new JScrollPane(jta);
+            add(jsp, BorderLayout.CENTER);
 
-        JPanel bottomPanel = new JPanel(new BorderLayout());
-        add(bottomPanel, BorderLayout.SOUTH);
-        JButton jbSend = new JButton("SEND");
-        bottomPanel.add(jbSend, BorderLayout.EAST);
-        jtf = new JTextField();
-        bottomPanel.add(jtf, BorderLayout.CENTER);
+            JPanel bottomPanel = new JPanel(new BorderLayout());
+            add(bottomPanel, BorderLayout.SOUTH);
+            JButton jbSend = new JButton("SEND");
+            bottomPanel.add(jbSend, BorderLayout.EAST);
+            jtf = new JTextField();
+            bottomPanel.add(jtf, BorderLayout.CENTER);
 
-        jbSend.addActionListener(e -> sendMsg());
-        jtf.addActionListener(e -> sendMsg());
+            jbSend.addActionListener(e -> sendMsg());
+            jtf.addActionListener(e -> sendMsg());
 
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    while (true) {
-                        if (in.hasNext()) {
-                            String w = in.nextLine();
-                            if (w.equalsIgnoreCase("end session")) break;
-                            jta.append(w);
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        while (true) {
+                            if (in.hasNext()) {
+                                String w = in.nextLine();
+                                if (w.equalsIgnoreCase("end session")) break;
+                                jta.append(w);
+                            }
                         }
+                    } catch (Exception e) {
                     }
-                } catch (Exception e) {
                 }
-            }
-        }).start();
+            }).start();
 
-        addWindowListener(new WindowAdapter() {
-            @Override
-            public void windowClosing(WindowEvent e) {
-                super.windowClosing(e);
-                try {
-                    out.println("end");
-                    out.flush();
-                    sock.close();
-                    out.close();
-                    in.close();
-                } catch (IOException exc) {
+            addWindowListener(new WindowAdapter() {
+                @Override
+                public void windowClosing(WindowEvent e) {
+                    super.windowClosing(e);
+                    try {
+                        out.println("end");
+                        out.flush();
+                        sock.close();
+                        out.close();
+                        in.close();
+                    } catch (IOException exc) {
+                    }
                 }
-            }
+            });
+
+            setVisible(true);
         });
-
-        setVisible(true);
+        t1.start();
     }
 
     public void sendMsg() {

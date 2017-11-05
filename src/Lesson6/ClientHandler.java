@@ -26,9 +26,9 @@ public class ClientHandler implements Runnable {
     @Override
     public void run() {
         while (true) {
-            if (in.hasNext()) {
-                String w = in.nextLine();
-                System.out.println(name + ": " + w);
+            if (in.hasNext()) { // hasNext() - передает ли сервер какие-то данные
+                String w = in.nextLine(); // Считывание этих данных
+                System.out.println(name + ": " + w); // Печать данных
                 out.println("echo: " + w);
                 out.flush();
                 if (w.equalsIgnoreCase("END")) break;
