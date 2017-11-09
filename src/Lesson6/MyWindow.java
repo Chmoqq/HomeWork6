@@ -56,34 +56,28 @@ public class MyWindow extends JFrame {
             jbSend.addActionListener(e -> sendMsgFromUI());
             jtf.addActionListener(e -> sendMsgFromUI());
 
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        while (true) {
-                            if (in.hasNext()) {
-                                String w = in.nextLine();
-                                if (w.equalsIgnoreCase("end session")) break;
-                                jta.append(w + System.lineSeparator());
-                            }
+            new Thread(() -> {
+                try {
+                    while (true) {
+                        if (in.hasNext()) {
+                            String w = in.nextLine();
+                            if (w.equalsIgnoreCase("end session")) break;
+                            jta.append(w + System.lineSeparator());
                         }
-                    } catch (Exception e) {
                     }
+                } catch (Exception e) {
                 }
             }).start();
 
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    Scanner s = new Scanner(System.in);
-                    while (true) {
-                        try {
-                            if (s.hasNext()) {
-                                sendMsg(s.nextLine());
-                            }
-                        } catch (Exception e) {
-                            e.printStackTrace();
+            new Thread(() -> {
+                Scanner s = new Scanner(System.in);
+                while (true) {
+                    try {
+                        if (s.hasNext()) {
+                            sendMsg(s.nextLine());
                         }
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
                 }
             }).start();
@@ -108,9 +102,9 @@ public class MyWindow extends JFrame {
     }
 
     private void sendMsg(String msg) {
-            if (!msg.trim().isEmpty()) {
-                out.println(msg);
-                System.out.println("Console: " + msg);
+        if (!msg.trim().isEmpty()) {
+            out.println(msg);
+            System.out.println("Console: " + msg);
         }
     }
 

@@ -22,7 +22,6 @@ public class MyServer {
                 System.out.println("Client connected");
                 client = new ClientHandler(s);
 
-                new Thread(() -> sendMsg()).start();
                 client.run();
             } catch (IOException e) {
                 e.printStackTrace();
@@ -39,14 +38,19 @@ public class MyServer {
         t1.start();
     }
 
-    private void sendMsg() {
+    private void consoleChecker() {
         Scanner s = new Scanner(System.in);
 
         while (true) {
-            if (s.hasNext()) {
-                String msg = s.nextLine();
-                System.out.println("Console: " + msg);
-                client.sendMessage("Console: " + msg);
+            try {
+                if (s.hasNext()) {
+                    String message = s.nextLine();
+                    String msg = "Console: " + message;
+                    client.sendMessage(msg);
+                    System.out.println(msg);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
     }
