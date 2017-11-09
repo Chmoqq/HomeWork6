@@ -1,5 +1,7 @@
 package Lesson6;
 
+import com.sun.org.apache.xml.internal.serialize.LineSeparator;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
@@ -30,7 +32,7 @@ public class MyWindow extends JFrame {
             try {
                 sock = new Socket(SERVER_ADDR, SERVER_PORT);
                 in = new Scanner(sock.getInputStream());
-                out = new PrintWriter(sock.getOutputStream());
+                out = new PrintWriter(sock.getOutputStream(), true);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -51,8 +53,8 @@ public class MyWindow extends JFrame {
             jtf = new JTextField();
             bottomPanel.add(jtf, BorderLayout.CENTER);
 
-            jbSend.addActionListener(e -> sendMsg());
-            jtf.addActionListener(e -> sendMsg());
+            jbSend.addActionListener(e -> sendMsgFromUI());
+            jtf.addActionListener(e -> sendMsgFromUI());
 
             new Thread(new Runnable() {
                 @Override
@@ -62,10 +64,26 @@ public class MyWindow extends JFrame {
                             if (in.hasNext()) {
                                 String w = in.nextLine();
                                 if (w.equalsIgnoreCase("end session")) break;
-                                jta.append(w + "\n");
+                                jta.append(w + System.lineSeparator());
                             }
                         }
                     } catch (Exception e) {
+                    }
+                }
+            }).start();
+
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    Scanner s = new Scanner(System.in);
+                    while (true) {
+                        try {
+                            if (s.hasNext()) {
+                                sendMsg(s.nextLine());
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
                     }
                 }
             }).start();
@@ -76,7 +94,6 @@ public class MyWindow extends JFrame {
                     super.windowClosing(e);
                     try {
                         out.println("end");
-                        out.flush();
                         sock.close();
                         out.close();
                         in.close();
@@ -90,11 +107,17 @@ public class MyWindow extends JFrame {
         t1.start();
     }
 
-    public void sendMsg() {
+    private void sendMsg(String msg) {
+            if (!msg.trim().isEmpty()) {
+                out.println(msg);
+                System.out.println("Console: " + msg);
+        }
+    }
+
+    private void sendMsgFromUI() {
         if (!jtf.getText().trim().isEmpty()) {
             String a = jtf.getText();
             out.println(a);
-            out.flush();
             jtf.setText("");
             jtf.grabFocus(); //Focusing on jTextField
         }

@@ -17,7 +17,7 @@ public class ClientHandler implements Runnable {
 
         try {
             this.s = s;
-            out = new PrintWriter(s.getOutputStream());
+            out = new PrintWriter(s.getOutputStream(), true);
             in = new Scanner(s.getInputStream());
             CLIENTS_COUNT++;
             name = "Client #" + CLIENTS_COUNT;
@@ -32,7 +32,6 @@ public class ClientHandler implements Runnable {
                 String w = in.nextLine(); // Считывание этих данных
                 System.out.println(name + ": " + w); // Печать данных
                 out.println("echo: " + w);
-                out.flush();
                 if (w.equalsIgnoreCase("END")) break;
             }
         }
@@ -49,7 +48,6 @@ public class ClientHandler implements Runnable {
         boolean contains = msg.contains("end");
         if (!contains) {
             out.println(msg);
-            out.flush();
         } else {
             System.out.println("System interrupted connection");
             try {
