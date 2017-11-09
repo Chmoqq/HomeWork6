@@ -13,7 +13,7 @@ public class ClientHandler implements Runnable {
     private String name;
 
     public ClientHandler(Socket s) {
-        // MyServer.clients.add(this);
+
 
         try {
             this.s = s;

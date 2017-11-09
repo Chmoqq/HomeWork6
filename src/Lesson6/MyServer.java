@@ -9,8 +9,11 @@ public class MyServer {
 
     private ClientHandler client;
 
+    public static void main(String[] args) {
+        MyServer myServer = new MyServer();
+    }
+
     public MyServer() {
-        Thread t1 = new Thread(() -> {
             System.out.println("test");
             ServerSocket server = null;
             Socket s = null;
@@ -22,6 +25,12 @@ public class MyServer {
                 System.out.println("Client connected");
                 client = new ClientHandler(s);
 
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        MyServer.this.consoleChecker();
+                    }
+                }).start();
                 client.run();
             } catch (IOException e) {
                 e.printStackTrace();
@@ -34,8 +43,6 @@ public class MyServer {
                     e.printStackTrace();
                 }
             }
-        });
-        t1.start();
     }
 
     private void consoleChecker() {

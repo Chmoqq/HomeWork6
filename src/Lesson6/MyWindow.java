@@ -23,82 +23,78 @@ public class MyWindow extends JFrame {
     private PrintWriter out;
 
     public static void main(String[] args) {
-        MyServer myServer = new MyServer();
         MyWindow myWindow = new MyWindow();
     }
 
     public MyWindow() {
-        Thread t1 = new Thread(() -> {
+        try {
+            sock = new Socket(SERVER_ADDR, SERVER_PORT);
+            in = new Scanner(sock.getInputStream());
+            out = new PrintWriter(sock.getOutputStream(), true);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        setBounds(600, 300, 500, 500);
+        setTitle("Client");
+        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        jta = new JTextArea();
+        jta.setEditable(false);
+        jta.setLineWrap(true);
+        JScrollPane jsp = new JScrollPane(jta);
+        add(jsp, BorderLayout.CENTER);
+
+        JPanel bottomPanel = new JPanel(new BorderLayout());
+        add(bottomPanel, BorderLayout.SOUTH);
+        JButton jbSend = new JButton("SEND");
+        bottomPanel.add(jbSend, BorderLayout.EAST);
+        jtf = new JTextField();
+        bottomPanel.add(jtf, BorderLayout.CENTER);
+
+        jbSend.addActionListener(e -> sendMsgFromUI());
+        jtf.addActionListener(e -> sendMsgFromUI());
+
+        new Thread(() -> {
             try {
-                sock = new Socket(SERVER_ADDR, SERVER_PORT);
-                in = new Scanner(sock.getInputStream());
-                out = new PrintWriter(sock.getOutputStream(), true);
-            } catch (IOException e) {
-                e.printStackTrace();
+                while (true) {
+                    if (in.hasNext()) {
+                        String w = in.nextLine();
+                        if (w.equalsIgnoreCase("end session")) break;
+                        jta.append(w + System.lineSeparator());
+                    }
+                }
+            } catch (Exception e) {
             }
+        }).start();
 
-            setBounds(600, 300, 500, 500);
-            setTitle("Client");
-            setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-            jta = new JTextArea();
-            jta.setEditable(false);
-            jta.setLineWrap(true);
-            JScrollPane jsp = new JScrollPane(jta);
-            add(jsp, BorderLayout.CENTER);
-
-            JPanel bottomPanel = new JPanel(new BorderLayout());
-            add(bottomPanel, BorderLayout.SOUTH);
-            JButton jbSend = new JButton("SEND");
-            bottomPanel.add(jbSend, BorderLayout.EAST);
-            jtf = new JTextField();
-            bottomPanel.add(jtf, BorderLayout.CENTER);
-
-            jbSend.addActionListener(e -> sendMsgFromUI());
-            jtf.addActionListener(e -> sendMsgFromUI());
-
-            new Thread(() -> {
+        new Thread(() -> {
+            Scanner s = new Scanner(System.in);
+            while (true) {
                 try {
-                    while (true) {
-                        if (in.hasNext()) {
-                            String w = in.nextLine();
-                            if (w.equalsIgnoreCase("end session")) break;
-                            jta.append(w + System.lineSeparator());
-                        }
+                    if (s.hasNext()) {
+                        sendMsg(s.nextLine());
                     }
                 } catch (Exception e) {
+                    e.printStackTrace();
                 }
-            }).start();
+            }
+        }).start();
 
-            new Thread(() -> {
-                Scanner s = new Scanner(System.in);
-                while (true) {
-                    try {
-                        if (s.hasNext()) {
-                            sendMsg(s.nextLine());
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                super.windowClosing(e);
+                try {
+                    out.println("end");
+                    sock.close();
+                    out.close();
+                    in.close();
+                } catch (IOException exc) {
                 }
-            }).start();
-
-            addWindowListener(new WindowAdapter() {
-                @Override
-                public void windowClosing(WindowEvent e) {
-                    super.windowClosing(e);
-                    try {
-                        out.println("end");
-                        sock.close();
-                        out.close();
-                        in.close();
-                    } catch (IOException exc) {
-                    }
-                }
-            });
-
-            setVisible(true);
+            }
         });
-        t1.start();
+
+        setVisible(true);
     }
 
     private void sendMsg(String msg) {
