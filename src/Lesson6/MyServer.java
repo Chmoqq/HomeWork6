@@ -44,7 +44,9 @@ public class MyServer {
 
         while (true) {
             if (s.hasNext()) {
-                client.sendMessage("Console: " + s.nextLine());
+                String msg = s.nextLine();
+                System.out.println("Console: " + msg);
+                client.sendMessage("Console: " + msg);
             }
         }
     }

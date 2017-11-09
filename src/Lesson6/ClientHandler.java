@@ -46,8 +46,19 @@ public class ClientHandler implements Runnable {
     }
 
     public void sendMessage(String msg) {
-        out.println(msg);
-        out.flush();
+        boolean contains = msg.contains("end");
+        if (!contains) {
+            out.println(msg);
+            out.flush();
+        } else {
+            System.out.println("System interrupted connection");
+            try {
+                s.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            System.exit(0);
+        }
     }
 }
 
