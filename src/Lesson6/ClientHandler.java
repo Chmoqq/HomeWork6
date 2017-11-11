@@ -1,62 +1,107 @@
 package Lesson6;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.net.Socket;
-import java.util.Scanner;
 
 public class ClientHandler implements Runnable {
-    private Socket s;
-    private PrintWriter out;
-    private Scanner in;
-    private static int CLIENTS_COUNT = 0;
-    private String name;
+    private MyServer server;
+    private Socket socket;
+    private DataOutputStream out;
+    private DataInputStream in;
+    private String name = null;
+    private boolean isAuth = false;
 
-    public ClientHandler(Socket s) {
-
-
+    public ClientHandler(MyServer server, Socket socket) {
+        this.server = server;
         try {
-            this.s = s;
-            out = new PrintWriter(s.getOutputStream(), true);
-            in = new Scanner(s.getInputStream());
-            CLIENTS_COUNT++;
-            name = "Client #" + CLIENTS_COUNT;
+            this.socket = socket;
+            out = new DataOutputStream(socket.getOutputStream());
+            in = new DataInputStream(socket.getInputStream());
         } catch (IOException e) {
+            System.out.println("Client handler initialization failed: " + e.getLocalizedMessage());
         }
     }
 
     @Override
     public void run() {
-        while (true) {
-            if (in.hasNext()) { // hasNext() - передает ли сервер какие-то данные
-                String w = in.nextLine(); // Считывание этих данных
-                System.out.println(name + ": " + w); // Печать данных
-                out.println("echo: " + w);
-                if (w.equalsIgnoreCase("END")) break;
+        try {
+            while (true) {
+                switch (in.readByte()) {
+                    case 1:
+                        // login
+                        String username = in.readUTF();
+                        String password = in.readUTF();
+
+                        name = server.getAuthService().getNick(username, password);
+                        if (name != null) {
+                            isAuth = true;
+                            server.sendBroadcastMessage("Server", name + " зашел в чат!");
+                        } else {
+                            sendMessage("Server", "Неверные логин/пароль");
+                        }
+                        break;
+                    case 2:
+                        // message
+                        String message = in.readUTF();
+                        if (isAuth)
+                            server.sendBroadcastMessage(name, message);
+                        break;
+                    case 4:
+                        String target = in.readUTF();
+                        String w_message = in.readUTF();
+                        if (isAuth)
+                            server.sendWhisper(this, target, w_message);
+                        break;
+                    default:
+                        server.close(socket);
+                        break;
+                }
             }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         try {
             System.out.println("Client disconnected");
-            // MyServer.clients.remove(this);
-            s.close();
+            socket.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    public void sendMessage(String msg) {
-        boolean contains = msg.contains("end");
-        if (!contains) {
-            out.println(msg);
-        } else {
-            System.out.println("System interrupted connection");
-            try {
-                s.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            System.exit(0);
+    public void sendMessage(String username, String msg) {
+        try {
+            out.writeByte(3); //server_message
+            out.writeUTF(username);
+            out.writeUTF(msg);
+            out.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
+    }
+
+    public void sendWhisper(String source, String msg) {
+        try {
+            out.writeByte(5); // new_whisper
+            out.writeUTF(source);
+            out.writeUTF(msg);
+            out.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public boolean isActive() {
+        return isAuth;
+    }
+
+    public Socket getSocket() {
+        return socket;
+    }
+
+    public String getName() {
+        return this.name;
     }
 }
 

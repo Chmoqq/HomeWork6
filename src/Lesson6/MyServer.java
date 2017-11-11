@@ -1,64 +1,70 @@
 package Lesson6;
 
+import com.sun.deploy.util.SessionState;
+
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Scanner;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MyServer {
 
-    private ClientHandler client;
+    private List<ClientHandler> clients = new ArrayList<>();
+    private AuthService authService;
 
     public static void main(String[] args) {
-        MyServer myServer = new MyServer();
+        new MyServer(new BaseAuthService());
     }
 
-    public MyServer() {
-            System.out.println("test");
-            ServerSocket server = null;
-            Socket s = null;
-            try {
-                server = new ServerSocket(8189);
-                System.out.println("Server created. Waiting for client...");
+    public MyServer(AuthService authService) {
+        this.authService = authService;
 
+        Socket s = null;
+        ServerSocket server = null;
+        try {
+            server = new ServerSocket(8189);
+            System.out.println("Server created. Waiting for client...");
+            while (true) {
                 s = server.accept();
-                System.out.println("Client connected");
-                client = new ClientHandler(s);
-
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        MyServer.this.consoleChecker();
-                    }
-                }).start();
-                client.run();
-            } catch (IOException e) {
-                e.printStackTrace();
-            } finally {
-                try {
-                    server.close();
-                    System.out.println("Server closed");
-                    s.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                ClientHandler client = new ClientHandler(this, s);
+                new Thread(client).start();
+                clients.add(client);
             }
-    }
-
-    private void consoleChecker() {
-        Scanner s = new Scanner(System.in);
-
-        while (true) {
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
             try {
-                if (s.hasNext()) {
-                    String message = s.nextLine();
-                    String msg = "Console: " + message;
-                    client.sendMessage(msg);
-                    System.out.println(msg);
-                }
-            } catch (Exception e) {
+                if (server != null) server.close();
+                System.out.println("Server closed");
+                if (s != null) s.close();
+            } catch (IOException e) {
                 e.printStackTrace();
             }
         }
+    }
+
+    public AuthService getAuthService() {
+        return authService;
+    }
+
+    public void sendBroadcastMessage(String username, String msg) {
+        for (ClientHandler c : clients) {
+            if (c.isActive())
+                c.sendMessage(username, msg);
+        }
+    }
+
+    public void sendWhisper(ClientHandler source, String target, String msg) {
+        for (ClientHandler c : clients) {
+            if (c.isActive())
+                if (c.getName().equals(target))
+                    c.sendWhisper(source.getName(), msg);
+        }
+    }
+
+    public void close(Socket socket) {
+        clients.removeIf(clientHandler -> clientHandler.getSocket().equals(socket));
+        //FIXME
     }
 }
