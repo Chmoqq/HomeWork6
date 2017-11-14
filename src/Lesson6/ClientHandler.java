@@ -4,6 +4,8 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ClientHandler implements Runnable {
     private MyServer server;
@@ -29,8 +31,7 @@ public class ClientHandler implements Runnable {
         try {
             while (true) {
                 switch (in.readByte()) {
-                    case 1:
-                        // login
+                    case 1: // Authorization
                         String username = in.readUTF();
                         String password = in.readUTF();
 
@@ -44,22 +45,35 @@ public class ClientHandler implements Runnable {
                             sendMessage("> [Server] <", "Пользователь зарегистрирован, пройдите авторизацию повторно");
                         }
                         break;
-                    case 2:
-                        // message
+                    case 2: // message
                         String message = in.readUTF();
                         if (isAuth)
                             server.sendBroadcastMessage(name, message);
                         break;
-                    case 4:
+                    case 4: //private message
                         String target = in.readUTF();
                         String w_message = in.readUTF();
                         if (isAuth) {
                             server.sendWhisper(this, target, w_message);
-                        } else
-                            System.out.println("Bug");
+                        }
                         break;
-                    case 6:
+                    case 6: // multiple private messages
+                        int targets_count = in.readShort();
+                        String[] targets = new String[targets_count];
 
+                        for (int i = 0; i < targets_count; i++)
+                            targets[i] = in.readUTF();
+
+                        String mw_message = in.readUTF();
+
+                        List<String> successful_targets = new ArrayList<>();
+                        for (String mw_target : targets) {
+                            if (server.sendWhisper(this, mw_target, mw_message))
+                                successful_targets.add(mw_target);
+                        }
+
+                        this.serverMessage("Ваше сообщение отправлено пользователям: " + String.join(", ", successful_targets));
+                        break;
 
                     default:
                         server.close(socket);
@@ -111,8 +125,15 @@ public class ClientHandler implements Runnable {
         return this.name;
     }
 
-    public boolean userExist(String username) {
-        return server.getAuthService().contains(username);
+    public void serverMessage(String msg) {
+        this.sendMessage("Server", msg);
+//        try {
+//            out.writeByte(7);
+//            out.writeUTF("> [Server] <" + msg);
+//            out.flush();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
     }
 }
 

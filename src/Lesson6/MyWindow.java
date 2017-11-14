@@ -36,12 +36,7 @@ public class MyWindow extends JFrame {
         setTitle("Client");
         login.setToolTipText("Enter your login");
         pass.setToolTipText("Enter your password");
-        authBtn.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                connect(login.getText(), pass.getText());
-            }
-        });
+        authBtn.addActionListener(e -> connect(login.getText(), pass.getText()));
         JPanel authPanel = new JPanel(new GridLayout());
         authPanel.add(login);
         authPanel.add(pass);
@@ -161,7 +156,7 @@ public class MyWindow extends JFrame {
             System.out.println("Failed to send" + e.getLocalizedMessage());
         }
 
-        //jta.append("Вы отправили сообщение пользователю с ником " + username + ": " + msg + System.lineSeparator());
+        jta.append("> [" + username + "] < : " + msg + System.lineSeparator());
     }
 
     private void sendMsgFromUI() {
@@ -186,10 +181,22 @@ public class MyWindow extends JFrame {
     private void sendChatMessage(String msg) {
         String[] data = msg.substring(Command.SEND_CHAT_MESSAGE.getText().length()).split("-m");
         if (data.length == 2) {
-            String[] recievers = data[0].split(" ");
+            String[] targets = data[0].split(" ");
             String message = data[1];
-            for (String reciever : recievers) {
-                sendWhisper(reciever, message);
+            /*for (String recipient : recievers) {
+                sendWhisper(recipient, message);
+            }*/
+
+            try {
+                out.writeByte(6); // multiple whisper
+                out.writeShort(targets.length);
+                for (String target : targets) {
+                    out.writeUTF(target);
+                }
+                out.writeUTF(message);
+                out.flush();
+            } catch (IOException e) {
+                System.out.println("Failed to send" + e.getLocalizedMessage());
             }
         } else {
             System.out.println("Invalid chat message command");

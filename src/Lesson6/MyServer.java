@@ -53,12 +53,15 @@ public class MyServer {
         }
     }
 
-    public void sendWhisper(ClientHandler source, String target, String msg) {
+    public boolean sendWhisper(ClientHandler source, String target, String msg) {
         for (ClientHandler c : clients) {
-            if (c.isActive())
-                if (c.getName().equals(target))
-                    c.sendWhisper(source.getName(), msg);
+            if (c.isActive() && c.getName().equals(target)) {
+                c.sendWhisper(source.getName(), msg);
+                return true;
+            }
         }
+
+        return false;
     }
 
     public void close(Socket socket) {
