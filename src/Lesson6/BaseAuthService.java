@@ -1,5 +1,11 @@
 package Lesson6;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,22 +35,36 @@ public class BaseAuthService implements AuthService {
         }
     }
 
-    private List<Entry> entries;
+    private List<Entry> entries = new ArrayList<>();
+    private String fileLocation = "clients.txt";
+    private File clients = new File(fileLocation);
 
     public BaseAuthService() {
-        entries = new ArrayList<>();
-        entries.add(new Entry("Login", "Password", "abc"));
-        entries.add(new Entry("login2", "password2", "nickname2"));
-        entries.add(new Entry("login3", "password3", "nickname3"));
+        try {
+            Files.lines(Paths.get(fileLocation), StandardCharsets.UTF_8).forEach((meme) -> {
+                String[] credentials = meme.split(":", 2);
+                addClient(credentials[0], credentials[1]);
+            });
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 
     @Override
-    public boolean login(String login, String pass) {
-        for (Entry e : entries) {
-            if (e.getLogin().equals(login) && e.getPass().equals(pass)) return true;
+    public void addClient(String log, String pass) {
+        entries.add(new Entry(log, pass, log));
+
+        List<String> clients_raw = new ArrayList<>();
+        entries.forEach((entry -> {
+            clients_raw.add(entry.getLogin() + ":" + entry.getPass());
+        }));
+
+        try {
+            Files.write(Paths.get(fileLocation), clients_raw);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        return false;
     }
 
     @Override

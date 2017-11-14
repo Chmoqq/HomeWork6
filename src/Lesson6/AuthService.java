@@ -1,8 +1,6 @@
 package Lesson6;
 
 public interface AuthService {
-
-    boolean login(String login, String pass);
-
+    void addClient(String log, String pass);
     String getNick(String login, String password);
 }

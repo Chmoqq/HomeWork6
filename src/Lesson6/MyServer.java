@@ -1,7 +1,5 @@
 package Lesson6;
 
-import com.sun.deploy.util.SessionState;
-
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;

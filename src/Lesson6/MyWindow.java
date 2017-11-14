@@ -47,12 +47,6 @@ public class MyWindow extends JFrame {
         authPanel.add(pass);
         authPanel.add(authBtn);
         add(authPanel, BorderLayout.NORTH);
-//        JMenuBar authBar = new JMenuBar();
-//        JMenu authMenu = new JMenu("Main menu");
-//        JMenuItem auth = new JMenuItem("Authentication");
-//        authBar.add(authMenu);
-//        add(authBar);
-//        authBar.addA
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         jta = new JTextArea();
         jta.setEditable(false);
