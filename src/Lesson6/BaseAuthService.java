@@ -37,7 +37,10 @@ public class BaseAuthService implements AuthService {
 
     private List<Entry> entries = new ArrayList<>();
     private String fileLocation = "clients.txt";
-    private File clients = new File(fileLocation);
+
+    public List<Entry> getEntries() {
+        return entries;
+    }
 
     public BaseAuthService() {
         try {
@@ -48,6 +51,20 @@ public class BaseAuthService implements AuthService {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public boolean contains(String username) {
+        if (!(username == null || username.trim().isEmpty())) {
+            for (Entry e : entries) {
+                if (username.equals(e.getNick())) {
+                    return true;
+                }
+            }
+        } else {
+            return false;
+        }
+        return false;
     }
 
 
@@ -69,7 +86,6 @@ public class BaseAuthService implements AuthService {
 
     @Override
     public String getNick(String login, String password) {
-
         for (Entry e : entries) {
             if (e.getLogin().equals(login) && e.getPass().equals(password)) return e.getNick();
         }

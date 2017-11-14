@@ -17,8 +17,8 @@ public class MyWindow extends JFrame {
 
     private JTextField jtf;
     private JTextArea jta;
-    private JTextField login = new JTextField("Login");
-    private JTextField pass = new JTextField("Password");
+    private JTextField login = new JTextField("login");
+    private JTextField pass = new JTextField("password");
     private JButton authBtn = new JButton("Auth");
 
     private final String SERVER_ADDR = "localhost";
@@ -131,7 +131,7 @@ public class MyWindow extends JFrame {
                             String w_username = in.readUTF();
                             String w_message = in.readUTF();
 
-                            jta.append("> [" + w_username + "] " + w_message + System.lineSeparator());
+                            jta.append(w_username + " написал вам личное сообщение: " + w_message + System.lineSeparator());
                             break;
                     }
                     Thread.sleep(100);
@@ -161,7 +161,7 @@ public class MyWindow extends JFrame {
             System.out.println("Failed to send" + e.getLocalizedMessage());
         }
 
-        jta.append("< [" + username + "] " + msg + System.lineSeparator());
+        jta.append("Вы отправили сообщение пользователю с ником " + username + ": " + msg + System.lineSeparator());
     }
 
     private void sendMsgFromUI() {
@@ -172,12 +172,29 @@ public class MyWindow extends JFrame {
 
             if (a.startsWith("/w ") && args.length >= 3)
                 sendWhisper(args[1], a.split(" ", 3)[2]);
-            else
+            else if (a.startsWith("/clients") && args.length >= 4) {
+                sendChatMessage(a);
+            } else {
                 sendMsg(a);
+            }
 
             jtf.setText("");
             jtf.grabFocus(); //Focusing on jTextField
         }
+    }
+
+    private void sendChatMessage(String msg) {
+        String[] data = msg.substring(Command.SEND_CHAT_MESSAGE.getText().length()).split("-m");
+        if (data.length == 2) {
+            String[] recievers = data[0].split(" ");
+            String message = data[1];
+            for (String reciever : recievers) {
+                sendWhisper(reciever, message);
+            }
+        } else {
+            System.out.println("Invalid chat message command");
+        }
+
     }
 }
 

@@ -53,9 +53,14 @@ public class ClientHandler implements Runnable {
                     case 4:
                         String target = in.readUTF();
                         String w_message = in.readUTF();
-                        if (isAuth)
+                        if (isAuth) {
                             server.sendWhisper(this, target, w_message);
+                        } else
+                            System.out.println("Bug");
                         break;
+                    case 6:
+
+
                     default:
                         server.close(socket);
                         break;
@@ -104,6 +109,10 @@ public class ClientHandler implements Runnable {
 
     public String getName() {
         return this.name;
+    }
+
+    public boolean userExist(String username) {
+        return server.getAuthService().contains(username);
     }
 }
 
