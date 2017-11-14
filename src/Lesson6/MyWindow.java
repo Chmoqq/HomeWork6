@@ -131,7 +131,7 @@ public class MyWindow extends JFrame {
                             String w_username = in.readUTF();
                             String w_message = in.readUTF();
 
-                            jta.append(w_username + " написал вам личное сообщение: " + w_message + System.lineSeparator());
+                            jta.append("> ["+ w_username + "] <" + " : " + w_message + System.lineSeparator());
                             break;
                     }
                     Thread.sleep(100);
@@ -161,7 +161,7 @@ public class MyWindow extends JFrame {
             System.out.println("Failed to send" + e.getLocalizedMessage());
         }
 
-        jta.append("Вы отправили сообщение пользователю с ником " + username + ": " + msg + System.lineSeparator());
+        //jta.append("Вы отправили сообщение пользователю с ником " + username + ": " + msg + System.lineSeparator());
     }
 
     private void sendMsgFromUI() {

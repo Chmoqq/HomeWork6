@@ -37,11 +37,11 @@ public class ClientHandler implements Runnable {
                         name = server.getAuthService().getNick(username, password);
                         if (name != null) {
                             isAuth = true;
-                            server.sendBroadcastMessage("Server", name + " зашел в чат!");
+                            server.sendBroadcastMessage("> [Server] <", name + " зашел в чат!");
                         } else {
-                            sendMessage("Server", "Неверные логин/пароль" + "Идет регистрация нового пользователя...");
+                            sendMessage("> [Server] <", "Неверные логин/пароль" + "Идет регистрация нового пользователя...");
                             server.getAuthService().addClient(username, password);
-                            sendMessage("Server", "Пользователь зарегистрирован, пройдите авторизацию повторно");
+                            sendMessage("> [Server] <", "Пользователь зарегистрирован, пройдите авторизацию повторно");
                         }
                         break;
                     case 2:
