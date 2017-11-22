@@ -38,6 +38,7 @@ public class ClientHandler implements Runnable {
                         name = server.getAuthService().getNick(username, password);
                         if (name != null) {
                             isAuth = true;
+                            out.writeByte(6);
                             server.sendBroadcastMessage("> [Server] <", name + " зашел в чат!");
                         } else {
                             sendMessage("> [Server] <", "Неверные логин/пароль" + "Идет регистрация нового пользователя...");
@@ -67,14 +68,20 @@ public class ClientHandler implements Runnable {
                         String mw_message = in.readUTF();
 
                         List<String> successful_targets = new ArrayList<>();
+                        List<String> unsuccesful_targets = new ArrayList<>();
                         for (String mw_target : targets) {
-                            if (server.sendWhisper(this, mw_target, mw_message))
+                            if (server.sendWhisper(this, mw_target, mw_message)) {
                                 successful_targets.add(mw_target);
+                            } else {
+                                unsuccesful_targets.add(mw_target);
+                            }
+
+                            this.serverMessage("Ваше сообщение отправлено пользователям: " + String.join(", ", successful_targets));
+                            this.serverMessage("Ваше сообщение не было отправлено пользователям: " + String.join(", ", unsuccesful_targets));
+                            break;
                         }
-
-                        this.serverMessage("Ваше сообщение отправлено пользователям: " + String.join(", ", successful_targets));
-                        break;
-
+                    case 7:
+                        serverMessage(server.isOnline());
                     default:
                         server.close(socket);
                         break;

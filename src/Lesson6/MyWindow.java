@@ -3,8 +3,6 @@ package Lesson6;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.DataInputStream;
@@ -97,6 +95,8 @@ public class MyWindow extends JFrame {
             return;
         }
         jtf.setEnabled(true);
+        setTitle("Client: " + log);
+
         try {
             sock = new Socket(SERVER_ADDR, SERVER_PORT);
             in = new DataInputStream(sock.getInputStream());
@@ -126,8 +126,11 @@ public class MyWindow extends JFrame {
                             String w_username = in.readUTF();
                             String w_message = in.readUTF();
 
-                            jta.append("> ["+ w_username + "] <" + " : " + w_message + System.lineSeparator());
+                            jta.append("> [" + w_username + "] <" + " : " + w_message + System.lineSeparator());
                             break;
+                        case 6:
+                            login.setEnabled(false);
+                            this.pass.setEnabled(false);
                     }
                     Thread.sleep(100);
                 }
@@ -169,6 +172,8 @@ public class MyWindow extends JFrame {
                 sendWhisper(args[1], a.split(" ", 3)[2]);
             else if (a.startsWith("/clients") && args.length >= 4) {
                 sendChatMessage(a);
+            } else if (a.startsWith("/online")) {
+                isOnline();
             } else {
                 sendMsg(a);
             }
@@ -201,7 +206,14 @@ public class MyWindow extends JFrame {
         } else {
             System.out.println("Invalid chat message command");
         }
+    }
 
+    private void isOnline() {
+        try {
+            out.writeByte(7);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
 

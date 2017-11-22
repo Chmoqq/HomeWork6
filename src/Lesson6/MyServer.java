@@ -49,6 +49,7 @@ public class MyServer {
     public void sendBroadcastMessage(String username, String msg) {
         for (ClientHandler c : clients) {
             if (c.isActive())
+
                 c.sendMessage(username, msg);
         }
     }
@@ -67,5 +68,18 @@ public class MyServer {
     public void close(Socket socket) {
         clients.removeIf(clientHandler -> clientHandler.getSocket().equals(socket));
         //FIXME
+    }
+    public String isOnline() {
+        List<String> onlineUsers = new ArrayList<>();
+        for (ClientHandler c: clients) {
+            if (c.isActive()) {
+                onlineUsers.add(c.getName());
+            }
+        }
+        if (onlineUsers.size() > 0) {
+            return onlineUsers.toString();
+        } else {
+            return new String("No online users found");
+        }
     }
 }
