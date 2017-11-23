@@ -42,7 +42,7 @@ public class ClientHandler implements Runnable {
                             out.writeByte(6);
                             server.sendBroadcastMessage("> [Server] <", name + " зашел в чат!");
                         } else {
-                            if (!(server.getAuthService().isLoginMatch(username))) {
+                            if (server.getAuthService().isLoginMatch(username)) {
                                 serverMessage("User with the same login has registered");
                             } else {
                                 sendMessage("> [Server] <", "Неверные логин/пароль" + "Идет регистрация нового пользователя...");

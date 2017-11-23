@@ -14,21 +14,21 @@ public class BaseAuthService implements AuthService {
         private String pass;
         private String nick;
 
-         Entry(String login, String pass, String nick) {
+        Entry(String login, String pass, String nick) {
             this.login = login;
             this.pass = pass;
             this.nick = nick;
         }
 
-         String getLogin() {
+        String getLogin() {
             return login;
         }
 
-         String getPass() {
+        String getPass() {
             return pass;
         }
 
-         String getNick() {
+        String getNick() {
             return nick;
         }
     }
@@ -91,9 +91,10 @@ public class BaseAuthService implements AuthService {
     @Override
     public boolean isLoginMatch(String login) {
         for (Entry e : entries) {
-            if (!e.getLogin().equalsIgnoreCase(login)) return true;
-            else {
-                return false;
+            if ((e.getLogin().equalsIgnoreCase(login))) {
+                return true;
+            } else {
+                continue;
             }
         }
         return false;

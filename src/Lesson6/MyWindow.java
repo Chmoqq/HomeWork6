@@ -11,6 +11,8 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Scanner;
 
 public class MyWindow extends JFrame {
@@ -52,13 +54,13 @@ public class MyWindow extends JFrame {
             @Override
             public void focusGained(FocusEvent e) {
                 super.focusGained(e);
-                //FIXME
+                pass.setEchoChar((char)0);
             }
 
             @Override
             public void focusLost(FocusEvent e) {
                 super.focusLost(e);
-                //FIXME
+                pass.setEchoChar((char)8226);
             }
         });
 
@@ -186,7 +188,7 @@ public class MyWindow extends JFrame {
 
             if (a.startsWith("/w ") && args.length >= 3)
                 sendWhisper(args[1], a.split(" ", 3)[2]);
-            else if (a.startsWith("/clients") && args.length >= 4) {
+            else if (a.startsWith("/clients ") && a.contains(" -m ") && args.length >= 4) {
                 sendChatMessage(a);
             } else if (a.startsWith("/online")) {
                 isOnline();
@@ -200,17 +202,25 @@ public class MyWindow extends JFrame {
     }
 
     void sendChatMessage(String msg) {
-        String[] data = msg.substring(Command.SEND_CHAT_MESSAGE.getText().length()).split("-m");
+        String recepients_data = msg.split(" -m ")[0];
+        String message = msg.split(" -m ")[1];
+        String[] targets_old = recepients_data.substring(Command.SEND_CHAT_MESSAGE.getText().length()).split(" ");
+
+        ArrayList<String> targets = new ArrayList(Arrays.asList(recepients_data.split(" ")));
+        targets.remove(0);
+
+        String[] data = msg.substring(Command.SEND_CHAT_MESSAGE.getText().length()).split("-m ");
         if (data.length == 2) {
-            String[] targets = data[0].split(" ");
-            String message = data[1];
+//            String data0 = data[0];
+//            data0.trim(' ');
+//            data[0] = data0;
             /*for (String recipient : recievers) {
                 sendWhisper(recipient, message);
             }*/
 
             try {
                 out.writeByte(6); // multiple whisper
-                out.writeShort(targets.length);
+                out.writeShort(targets.size());
                 for (String target : targets) {
                     out.writeUTF(target);
                 }
