@@ -3,6 +3,8 @@ package Lesson6;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.DataInputStream;
@@ -16,7 +18,7 @@ public class MyWindow extends JFrame {
     private JTextField jtf;
     private JTextArea jta;
     private JTextField login = new JTextField("login");
-    private JTextField pass = new JTextField("password");
+    private JPasswordField pass = new JPasswordField("password");
     private JButton authBtn = new JButton("Auth");
 
     private final String SERVER_ADDR = "localhost";
@@ -29,12 +31,12 @@ public class MyWindow extends JFrame {
         MyWindow myWindow = new MyWindow();
     }
 
-    public MyWindow() {
+    MyWindow() {
         setBounds(600, 300, 500, 500);
         setTitle("Client");
         login.setToolTipText("Enter your login");
         pass.setToolTipText("Enter your password");
-        authBtn.addActionListener(e -> connect(login.getText(), pass.getText()));
+        authBtn.addActionListener(e -> connect(login.getText(), getPass()));
         JPanel authPanel = new JPanel(new GridLayout());
         authPanel.add(login);
         authPanel.add(pass);
@@ -46,6 +48,19 @@ public class MyWindow extends JFrame {
         jta.setLineWrap(true);
         JScrollPane jsp = new JScrollPane(jta);
         add(jsp, BorderLayout.CENTER);
+        pass.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                super.focusGained(e);
+                //FIXME
+            }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                super.focusLost(e);
+                //FIXME
+            }
+        });
 
         JPanel bottomPanel = new JPanel(new BorderLayout());
         add(bottomPanel, BorderLayout.SOUTH);
@@ -89,13 +104,11 @@ public class MyWindow extends JFrame {
         setVisible(true);
     }
 
-    private void connect(String log, String pass) {
+    void connect(String log, String pass) {
         if (log.trim().isEmpty() || pass.trim().isEmpty()) {
             System.out.println("Auth field is empty");
             return;
         }
-        jtf.setEnabled(true);
-        setTitle("Client: " + log);
 
         try {
             sock = new Socket(SERVER_ADDR, SERVER_PORT);
@@ -117,7 +130,7 @@ public class MyWindow extends JFrame {
                             String username = in.readUTF();
                             String message = in.readUTF();
 
-                            if (username == log)
+                            if (username.equals(log))
                                 username = "Me";
 
                             jta.append(username + ": " + message + System.lineSeparator());
@@ -129,17 +142,20 @@ public class MyWindow extends JFrame {
                             jta.append("> [" + w_username + "] <" + " : " + w_message + System.lineSeparator());
                             break;
                         case 6:
+                            jtf.setEnabled(true);
+                            setTitle("Client: " + log);
                             login.setEnabled(false);
                             this.pass.setEnabled(false);
                     }
                     Thread.sleep(100);
                 }
             } catch (Exception e) {
+                e.printStackTrace();
             }
         }).start();
     }
 
-    private void sendMsg(String msg) {
+    void sendMsg(String msg) {
         try {
             out.writeByte(2); // message
             out.writeUTF(msg);
@@ -149,7 +165,7 @@ public class MyWindow extends JFrame {
         }
     }
 
-    private void sendWhisper(String username, String msg) {
+    void sendWhisper(String username, String msg) {
         try {
             out.writeByte(4); // whisper
             out.writeUTF(username);
@@ -162,7 +178,7 @@ public class MyWindow extends JFrame {
         jta.append("> [" + username + "] < : " + msg + System.lineSeparator());
     }
 
-    private void sendMsgFromUI() {
+    void sendMsgFromUI() {
         if (!jtf.getText().trim().isEmpty()) {
             String a = jtf.getText();
 
@@ -183,7 +199,7 @@ public class MyWindow extends JFrame {
         }
     }
 
-    private void sendChatMessage(String msg) {
+    void sendChatMessage(String msg) {
         String[] data = msg.substring(Command.SEND_CHAT_MESSAGE.getText().length()).split("-m");
         if (data.length == 2) {
             String[] targets = data[0].split(" ");
@@ -208,12 +224,21 @@ public class MyWindow extends JFrame {
         }
     }
 
-    private void isOnline() {
+    void isOnline() {
         try {
             out.writeByte(7);
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    String getPass() {
+        StringBuilder password = new StringBuilder();
+        char[] passMassive = pass.getPassword();
+        for (char c : passMassive) {
+            password.append(c);
+        }
+        return password.toString();
     }
 }
 

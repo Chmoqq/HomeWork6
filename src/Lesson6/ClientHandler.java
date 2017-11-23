@@ -15,7 +15,7 @@ public class ClientHandler implements Runnable {
     private String name = null;
     private boolean isAuth = false;
 
-    public ClientHandler(MyServer server, Socket socket) {
+     ClientHandler(MyServer server, Socket socket) {
         this.server = server;
         try {
             this.socket = socket;
@@ -36,14 +36,19 @@ public class ClientHandler implements Runnable {
                         String password = in.readUTF();
 
                         name = server.getAuthService().getNick(username, password);
-                        if (name != null) {
+
+                        if (server.getAuthService().contains(name)) {
                             isAuth = true;
                             out.writeByte(6);
                             server.sendBroadcastMessage("> [Server] <", name + " зашел в чат!");
                         } else {
-                            sendMessage("> [Server] <", "Неверные логин/пароль" + "Идет регистрация нового пользователя...");
-                            server.getAuthService().addClient(username, password);
-                            sendMessage("> [Server] <", "Пользователь зарегистрирован, пройдите авторизацию повторно");
+                            if (!(server.getAuthService().isLoginMatch(username))) {
+                                serverMessage("User with the same login has registered");
+                            } else {
+                                sendMessage("> [Server] <", "Неверные логин/пароль" + "Идет регистрация нового пользователя...");
+                                server.getAuthService().addClient(username, password);
+                                sendMessage("> [Server] <", "Пользователь зарегистрирован, пройдите авторизацию повторно");
+                            }
                         }
                         break;
                     case 2: // message
@@ -98,7 +103,7 @@ public class ClientHandler implements Runnable {
         }
     }
 
-    public void sendMessage(String username, String msg) {
+     void sendMessage(String username, String msg) {
         try {
             out.writeByte(3); //server_message
             out.writeUTF(username);
@@ -109,7 +114,7 @@ public class ClientHandler implements Runnable {
         }
     }
 
-    public void sendWhisper(String source, String msg) {
+     void sendWhisper(String source, String msg) {
         try {
             out.writeByte(5); // new_whisper
             out.writeUTF(source);
@@ -120,27 +125,20 @@ public class ClientHandler implements Runnable {
         }
     }
 
-    public boolean isActive() {
+     boolean isActive() {
         return isAuth;
     }
 
-    public Socket getSocket() {
+     Socket getSocket() {
         return socket;
     }
 
-    public String getName() {
+     String getName() {
         return this.name;
     }
 
-    public void serverMessage(String msg) {
+     void serverMessage(String msg) {
         this.sendMessage("Server", msg);
-//        try {
-//            out.writeByte(7);
-//            out.writeUTF("> [Server] <" + msg);
-//            out.flush();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
     }
 }
 

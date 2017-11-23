@@ -14,21 +14,21 @@ public class BaseAuthService implements AuthService {
         private String pass;
         private String nick;
 
-        public Entry(String login, String pass, String nick) {
+         Entry(String login, String pass, String nick) {
             this.login = login;
             this.pass = pass;
             this.nick = nick;
         }
 
-        public String getLogin() {
+         String getLogin() {
             return login;
         }
 
-        public String getPass() {
+         String getPass() {
             return pass;
         }
 
-        public String getNick() {
+         String getNick() {
             return nick;
         }
     }
@@ -42,9 +42,9 @@ public class BaseAuthService implements AuthService {
 
     public BaseAuthService() {
         try {
-            Files.lines(Paths.get(fileLocation), StandardCharsets.UTF_8).forEach((meme) -> {
-                String[] credentials = meme.split(":", 2);
-                addClient(credentials[0], credentials[1]);
+            Files.lines(Paths.get(fileLocation), StandardCharsets.UTF_8).forEach(meme -> {
+                String[] credentials = meme.split(":", 3);
+                BaseAuthService.this.addClient(credentials[0], credentials[1]);
             });
         } catch (IOException e) {
             e.printStackTrace();
@@ -55,12 +55,10 @@ public class BaseAuthService implements AuthService {
     public boolean contains(String username) {
         if (!(username == null || username.trim().isEmpty())) {
             for (Entry e : entries) {
-                if (username.equals(e.getNick())) {
+                if (username.equalsIgnoreCase(e.getNick())) {
                     return true;
                 }
             }
-        } else {
-            return false;
         }
         return false;
     }
@@ -71,9 +69,7 @@ public class BaseAuthService implements AuthService {
         entries.add(new Entry(log, pass, log));
 
         List<String> clients_raw = new ArrayList<>();
-        entries.forEach((entry -> {
-            clients_raw.add(entry.getLogin() + ":" + entry.getPass());
-        }));
+        entries.forEach((entry -> clients_raw.add(entry.getLogin() + ":" + entry.getPass() + ":" + entry.getNick())));
 
         try {
             Files.write(Paths.get(fileLocation), clients_raw);
@@ -85,8 +81,21 @@ public class BaseAuthService implements AuthService {
     @Override
     public String getNick(String login, String password) {
         for (Entry e : entries) {
-            if (e.getLogin().equals(login) && e.getPass().equals(password)) return e.getNick();
+            if (e.getLogin().equals(login) && e.getPass().equals(password)) {
+                return e.getNick();
+            }
         }
         return null;
+    }
+
+    @Override
+    public boolean isLoginMatch(String login) {
+        for (Entry e : entries) {
+            if (!e.getLogin().equalsIgnoreCase(login)) return true;
+            else {
+                return false;
+            }
+        }
+        return false;
     }
 }

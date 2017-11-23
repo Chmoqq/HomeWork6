@@ -15,7 +15,7 @@ public class MyServer {
         new MyServer(new BaseAuthService());
     }
 
-    public MyServer(AuthService authService) {
+     MyServer(AuthService authService) {
         this.authService = authService;
 
         Socket s = null;
@@ -42,11 +42,11 @@ public class MyServer {
         }
     }
 
-    public AuthService getAuthService() {
+     AuthService getAuthService() {
         return authService;
     }
 
-    public void sendBroadcastMessage(String username, String msg) {
+     void sendBroadcastMessage(String username, String msg) {
         for (ClientHandler c : clients) {
             if (c.isActive())
 
@@ -54,7 +54,7 @@ public class MyServer {
         }
     }
 
-    public boolean sendWhisper(ClientHandler source, String target, String msg) {
+     boolean sendWhisper(ClientHandler source, String target, String msg) {
         for (ClientHandler c : clients) {
             if (c.isActive() && c.getName().equals(target)) {
                 c.sendWhisper(source.getName(), msg);
@@ -65,11 +65,11 @@ public class MyServer {
         return false;
     }
 
-    public void close(Socket socket) {
+     void close(Socket socket) {
         clients.removeIf(clientHandler -> clientHandler.getSocket().equals(socket));
         //FIXME
     }
-    public String isOnline() {
+     String isOnline() {
         List<String> onlineUsers = new ArrayList<>();
         for (ClientHandler c: clients) {
             if (c.isActive()) {
