@@ -10,6 +10,7 @@ import java.awt.event.WindowEvent;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -29,7 +30,7 @@ public class MyWindow extends JFrame {
     private DataInputStream in;
     private DataOutputStream out;
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws MalformedURLException, AWTException {
         MyWindow myWindow = new MyWindow();
     }
 
@@ -132,22 +133,28 @@ public class MyWindow extends JFrame {
                             String username = in.readUTF();
                             String message = in.readUTF();
 
-                            if (username.equals(log))
-                                username = "Me";
 
-                            jta.append(username + ": " + message + System.lineSeparator());
+                            if (username.equals(log)) {
+                                username = "Me";
+                                jta.append(username + ": " + message + System.lineSeparator());
+                            } else {
+                                SystemNotifications.getInstance().DisplayTray("Server", username + " sent you a message");
+                                jta.append(username + ": " + message + System.lineSeparator());
+                            }
                             break;
                         case 5:
                             String w_username = in.readUTF();
                             String w_message = in.readUTF();
 
                             jta.append("> [" + w_username + "] <" + " : " + w_message + System.lineSeparator());
+                            SystemNotifications.getInstance().DisplayTray("Server", w_username + " sent you a whisper");
                             break;
                         case 6:
                             jtf.setEnabled(true);
                             setTitle("Client: " + log);
                             login.setEnabled(false);
                             this.pass.setEnabled(false);
+                            SystemNotifications.getInstance().DisplayTray("Server", "Logged as " + log);
                     }
                     Thread.sleep(100);
                 }
