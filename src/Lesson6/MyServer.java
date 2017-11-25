@@ -61,7 +61,6 @@ public class MyServer {
                 return true;
             }
         }
-
         return false;
     }
 
@@ -80,6 +79,13 @@ public class MyServer {
             return onlineUsers.toString();
         } else {
             return new String("No online users found");
+        }
+    }
+    public void serverNotification(String name, String msg) {
+        for (ClientHandler c: clients) {
+            if (c.isActive()) {
+                c.serverNotification(name, msg);
+            }
         }
     }
 }

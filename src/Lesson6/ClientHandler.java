@@ -15,7 +15,7 @@ public class ClientHandler implements Runnable {
     private String name = null;
     private boolean isAuth = false;
 
-     ClientHandler(MyServer server, Socket socket) {
+    ClientHandler(MyServer server, Socket socket) {
         this.server = server;
         try {
             this.socket = socket;
@@ -40,14 +40,14 @@ public class ClientHandler implements Runnable {
                         if (server.getAuthService().contains(name)) {
                             isAuth = true;
                             out.writeByte(6);
-                            server.sendBroadcastMessage("> [Server] <", name + " зашел в чат!");
+                            server.serverNotification(name, " зашел в чат!");
                         } else {
                             if (server.getAuthService().isLoginMatch(username)) {
                                 serverMessage("User with the same login has registered");
                             } else {
-                                sendMessage("> [Server] <", "Неверные логин/пароль" + "Идет регистрация нового пользователя...");
+                                serverMessage("Неверные логин/пароль" + "Идет регистрация нового пользователя...");
                                 server.getAuthService().addClient(username, password);
-                                sendMessage("> [Server] <", "Пользователь зарегистрирован, пройдите авторизацию повторно");
+                                serverMessage("Пользователь зарегистрирован, пройдите авторизацию повторно");
                             }
                         }
                         break;
@@ -73,18 +73,21 @@ public class ClientHandler implements Runnable {
                         String mw_message = in.readUTF();
 
                         List<String> successful_targets = new ArrayList<>();
-                        List<String> unsuccesful_targets = new ArrayList<>();
+                        List<String> unsuccessful_targets = new ArrayList<>();
                         for (String mw_target : targets) {
                             if (server.sendWhisper(this, mw_target, mw_message)) {
                                 successful_targets.add(mw_target);
                             } else {
-                                unsuccesful_targets.add(mw_target);
+                                unsuccessful_targets.add(mw_target);
                             }
-
-                            this.serverMessage("Ваше сообщение отправлено пользователям: " + String.join(", ", successful_targets));
-                            this.serverMessage("Ваше сообщение не было отправлено пользователям: " + String.join(", ", unsuccesful_targets));
-                            break;
                         }
+                        if (unsuccessful_targets.size() == 0) {
+                            this.serverMessage("Ваше сообщение отправлено пользователям: " + String.join(", ", successful_targets));
+                        } else {
+                            this.serverMessage("Ваше сообщение отправлено пользователям: " + String.join(", ", successful_targets));
+                            this.serverMessage("Ваше сообщение не было отправлено пользователям: " + String.join(", ", unsuccessful_targets));
+                        }
+                        break;
                     case 7:
                         serverMessage(server.isOnline());
                     default:
@@ -103,9 +106,9 @@ public class ClientHandler implements Runnable {
         }
     }
 
-     void sendMessage(String username, String msg) {
+    void sendMessage(String username, String msg) {
         try {
-            out.writeByte(3); //server_message
+            out.writeByte(3);
             out.writeUTF(username);
             out.writeUTF(msg);
             out.flush();
@@ -114,9 +117,9 @@ public class ClientHandler implements Runnable {
         }
     }
 
-     void sendWhisper(String source, String msg) {
+    void sendWhisper(String source, String msg) {
         try {
-            out.writeByte(5); // new_whisper
+            out.writeByte(5);
             out.writeUTF(source);
             out.writeUTF(msg);
             out.flush();
@@ -125,20 +128,37 @@ public class ClientHandler implements Runnable {
         }
     }
 
-     boolean isActive() {
+    boolean isActive() {
         return isAuth;
     }
 
-     Socket getSocket() {
+    Socket getSocket() {
         return socket;
     }
 
-     String getName() {
+    String getName() {
         return this.name;
     }
 
-     void serverMessage(String msg) {
-        this.sendMessage("Server", msg);
+    void serverMessage(String msg) {
+        try {
+            out.writeByte(8);
+            out.writeUTF("Server");
+            out.writeUTF(msg);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    void serverNotification(String name, String msg) {
+        try {
+            out.writeByte(7);
+            out.writeUTF(name);
+            out.writeUTF(msg);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
 

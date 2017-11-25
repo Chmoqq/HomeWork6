@@ -1,6 +1,5 @@
 package Lesson6;
 
-import sun.security.util.SecurityConstants;
 
 import java.awt.*;
 import java.awt.TrayIcon.MessageType;
@@ -45,7 +44,7 @@ public class SystemNotifications {
         }
 
         trayIcon.setToolTip(client);
-        trayIcon.displayMessage(client, msg, MessageType.WARNING);
+        trayIcon.displayMessage(client, msg, MessageType.INFO);
         return true;
     }
 }

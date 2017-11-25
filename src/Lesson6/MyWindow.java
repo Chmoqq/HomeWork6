@@ -55,13 +55,13 @@ public class MyWindow extends JFrame {
             @Override
             public void focusGained(FocusEvent e) {
                 super.focusGained(e);
-                pass.setEchoChar((char)0);
+                pass.setEchoChar((char) 0);
             }
 
             @Override
             public void focusLost(FocusEvent e) {
                 super.focusLost(e);
-                pass.setEchoChar((char)8226);
+                pass.setEchoChar((char) 8226);
             }
         });
 
@@ -129,7 +129,7 @@ public class MyWindow extends JFrame {
             try {
                 while (true) {
                     switch (in.readByte()) {
-                        case 3:
+                        case 3: {
                             String username = in.readUTF();
                             String message = in.readUTF();
 
@@ -138,23 +138,45 @@ public class MyWindow extends JFrame {
                                 username = "Me";
                                 jta.append(username + ": " + message + System.lineSeparator());
                             } else {
-                                SystemNotifications.getInstance().DisplayTray("Server", username + " sent you a message");
+                                SystemNotifications.getInstance().DisplayTray(log, username + " sent you a message");
                                 jta.append(username + ": " + message + System.lineSeparator());
                             }
                             break;
-                        case 5:
+                        }
+                        case 5: {
                             String w_username = in.readUTF();
                             String w_message = in.readUTF();
 
-                            jta.append("> [" + w_username + "] <" + " : " + w_message + System.lineSeparator());
-                            SystemNotifications.getInstance().DisplayTray("Server", w_username + " sent you a whisper");
+                            jta.append("> [" + w_username + "] < " + w_message + System.lineSeparator());
+                            SystemNotifications.getInstance().DisplayTray(log, w_username + " sent you a whisper");
                             break;
-                        case 6:
+                        }
+                        case 6: {
                             jtf.setEnabled(true);
                             setTitle("Client: " + log);
                             login.setEnabled(false);
                             this.pass.setEnabled(false);
                             SystemNotifications.getInstance().DisplayTray("Server", "Logged as " + log);
+                            break;
+                        }
+                        case 7: {
+                            String server = "Server";
+                            String userName = in.readUTF();
+                            String msg = in.readUTF();
+                            if (userName.equals(log)) {
+                                jta.append("> [" + server + "] < " + userName + msg + System.lineSeparator());
+                            } else {
+                                jta.append("> [" + server + "] < " + userName + msg + System.lineSeparator());
+                                SystemNotifications.getInstance().DisplayTray(log, server + ": " + userName + " " + msg);
+                            }
+                            break;
+                        }
+
+                        case 8: {
+                            String username = in.readUTF();
+                            String message = in.readUTF();
+                            jta.append("> [" + username + "] < " + message + System.lineSeparator());
+                        }
                     }
                     Thread.sleep(100);
                 }
@@ -209,22 +231,12 @@ public class MyWindow extends JFrame {
     }
 
     void sendChatMessage(String msg) {
-        String recepients_data = msg.split(" -m ")[0];
-        String message = msg.split(" -m ")[1];
-        String[] targets_old = recepients_data.substring(Command.SEND_CHAT_MESSAGE.getText().length()).split(" ");
-
-        ArrayList<String> targets = new ArrayList(Arrays.asList(recepients_data.split(" ")));
-        targets.remove(0);
-
         String[] data = msg.substring(Command.SEND_CHAT_MESSAGE.getText().length()).split("-m ");
         if (data.length == 2) {
-//            String data0 = data[0];
-//            data0.trim(' ');
-//            data[0] = data0;
-            /*for (String recipient : recievers) {
-                sendWhisper(recipient, message);
-            }*/
-
+            String recipients_data = msg.split(" -m ")[0];
+            String message = msg.split(" -m ")[1];
+            ArrayList<String> targets = new ArrayList(Arrays.asList(recipients_data.split(" ")));
+            targets.remove(0);
             try {
                 out.writeByte(6); // multiple whisper
                 out.writeShort(targets.size());
