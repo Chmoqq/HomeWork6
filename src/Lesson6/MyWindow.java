@@ -181,7 +181,7 @@ public class MyWindow extends JFrame {
                     Thread.sleep(100);
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                System.out.println("Bye");
             }
         }).start();
     }

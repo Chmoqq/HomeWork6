@@ -5,6 +5,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
 
 public class MyServer {
 
@@ -66,7 +67,7 @@ public class MyServer {
 
      void close(Socket socket) {
         clients.removeIf(clientHandler -> clientHandler.getSocket().equals(socket));
-        //FIXME
+
     }
      String isOnline() {
         List<String> onlineUsers = new ArrayList<>();

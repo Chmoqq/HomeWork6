@@ -2,6 +2,7 @@ package Lesson6;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.EOFException;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -95,14 +96,14 @@ public class ClientHandler implements Runnable {
                         break;
                 }
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (IOException e) {
+            System.out.println("Signal lost");
         }
         try {
             System.out.println("Client disconnected");
             socket.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println("Socket closed");
         }
     }
 
