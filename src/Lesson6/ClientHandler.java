@@ -91,6 +91,8 @@ public class ClientHandler implements Runnable {
                         break;
                     case 7:
                         serverMessage(server.isOnline());
+                    case 8:
+                        serverMessage(in.readUTF());
                     default:
                         server.close(socket);
                         break;

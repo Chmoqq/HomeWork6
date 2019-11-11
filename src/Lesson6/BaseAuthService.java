@@ -34,7 +34,7 @@ public class BaseAuthService implements AuthService {
     }
 
     private List<Entry> entries = new ArrayList<>();
-    private String fileLocation = "clients.txt";
+    private String fileLocation = "/Users/ivandaniyelyan/Desktop/clients.txt";
 
     public List<Entry> getEntries() {
         return entries;

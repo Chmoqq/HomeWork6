@@ -21,10 +21,14 @@ public class MyWindow extends JFrame {
     private JTextField jtf;
     private JTextArea jta;
     private JTextField login = new JTextField("login");
+    private Profile profile = new Profile();
     private JPasswordField pass = new JPasswordField("password");
     private JButton authBtn = new JButton("Auth");
 
     private final String SERVER_ADDR = "localhost";
+    private String[] arrayPreset = new String[] {
+            "Name", "Surname", "Age", "City"
+    };
     private final int SERVER_PORT = 8189;
     private Socket sock;
     private DataInputStream in;
@@ -215,12 +219,29 @@ public class MyWindow extends JFrame {
 
             String[] args = a.split(" ");
 
-            if (a.startsWith("/w ") && args.length >= 3)
+            if (a.startsWith("/w ") && args.length >= 3) {
                 sendWhisper(args[1], a.split(" ", 3)[2]);
-            else if (a.startsWith("/clients ") && a.contains(" -m ") && args.length >= 4) {
+            } else if (a.startsWith("/clients ") && a.contains(" -m ") && args.length >= 4) {
                 sendChatMessage(a);
             } else if (a.startsWith("/online")) {
                 isOnline();
+            } else if(a.startsWith("/profile")) {
+                showProfile();
+            } else if (a.matches("(/name|/surname|/city|/age).*")) {
+                        String[] splitted = a.split("\\s+");
+                        switch (splitted[0]) {
+                            case "/name":
+                                profile.setName(splitted[1]);
+                                break;
+                            case "/surname":
+                                profile.setSurname(splitted[1]);
+                                break;
+                            case "/age":
+                                profile.setAge(Integer.valueOf(splitted[1]));
+                                break;
+                            case "/city":
+                                profile.setCity(splitted[1]);
+                        }
             } else {
                 sendMsg(a);
             }
@@ -250,6 +271,17 @@ public class MyWindow extends JFrame {
             }
         } else {
             System.out.println("Invalid chat message command");
+        }
+    }
+    void showProfile() {
+        String[] arrayProfile = profile.getProfile();
+        for (int i = 0; i < arrayProfile.length; i++) {
+            try {
+                out.writeByte(8);
+                out.writeUTF(arrayPreset[i] + ": " + (arrayProfile[i] != null ? arrayProfile[i]: "Empty"));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
